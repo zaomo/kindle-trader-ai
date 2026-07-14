@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#fff3e9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E" />
+  <title>登录 · Kindle Trader AI</title>
+  <link rel="stylesheet" href="/login.css" />
+  <script>
+    (function(){try{var t=localStorage.getItem('kta_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.dataset.theme='dark';}catch(e){}})();
+  </script>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="brand">
+        <span class="logo">📚</span>
+        <div>
+          <div class="title">Kindle Trader AI</div>
+          <div class="subtitle">登录后解锁无限次 AI 定价 / 文案</div>
+        </div>
+      </div>
+
+      <div class="seg auth-seg" id="authSeg">
+        <button data-mode="login" class="active">登录</button>
+        <button data-mode="register">注册</button>
+      </div>
+
+      <!-- 邮箱表单 -->
+      <form id="emailForm" class="auth-form" autocomplete="on">
+        <label class="field">
+          <span>邮箱</span>
+          <input type="email" id="email" placeholder="you@example.com" required aria-describedby="emailErr" />
+          <p class="field-err" id="emailErr"></p>
+        </label>
+        <label class="field">
+          <span>密码</span>
+          <input type="password" id="password" placeholder="至少 6 位" required aria-describedby="pwErr" />
+          <p class="field-err" id="pwErr"></p>
+        </label>
+        <!-- 邮箱验证码（仅注册时显示） -->
+        <label class="field" id="codeField" hidden>
+          <span>邮箱验证码</span>
+          <div class="code-row">
+            <input type="text" id="code" inputmode="numeric" maxlength="6" placeholder="6 位验证码" autocomplete="one-time-code" />
+            <button type="button" class="btn ghost" id="sendCodeBtn">发送验证码</button>
+          </div>
+        </label>
+        <button type="submit" class="btn primary block" id="emailSubmit">登录</button>
+      </form>
+
+      <div class="divider"><span>或</span></div>
+
+      <!-- 微信扫码登录 -->
+      <button class="btn wechat block" id="wechatBtn">
+        <span class="wx-ico">💬</span> 微信扫码登录
+      </button>
+      <p class="hint small" id="wechatHint">配置 WECHAT_APPID/SECRET 后走真实扫码授权；未配置时使用演示模式</p>
+
+      <a class="back-link" href="/">← 返回应用首页</a>
+    </div>
+  </div>
+
+  <!-- 微信演示扫码弹层 -->
+  <div id="wxMask" class="modal-mask" hidden>
+    <div class="modal wx-modal">
+      <button class="modal-close" id="wxClose" aria-label="关闭">×</button>
+      <h3 class="wx-title">微信扫码登录</h3>
+      <div class="qr-box" id="qrBox">
+        <div class="qr-fake">📱<br /><span>示意二维码</span></div>
+      </div>
+      <p class="hint" id="wxHint2">演示模式：点击「模拟扫码」即可体验完整登录流程</p>
+      <button class="btn primary block" id="wxSimBtn">模拟扫码</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/login.js"></script>
+</body>
+</html>

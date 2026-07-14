@@ -1,0 +1,21 @@
+# ===== SQLite 运行时数据（首次启动自动种子，无需提交） =====
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# ===== 密钥 / 环境变量 =====
+.env
+.env.local
+.env.*.local
+
+# ===== 操作系统 / 编辑器 =====
+.DS_Store
+.vscode/
+.idea/
+
+# ===== Node =====
+node_modules/
+
+# ===== 日志 =====
+*.log
+npm-debug.log*

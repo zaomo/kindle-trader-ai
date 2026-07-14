@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f5f5f7" />
+  <title>Kindle Trader AI · 管理后台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='18' y='18' width='64' height='64' rx='18' fill='%230071e3'/%3E%3Ctext x='50' y='66' font-size='42' font-family='-apple-system,sans-serif' font-weight='700' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <!-- 登录视图 -->
+  <div id="loginView" class="login-view">
+    <form id="loginForm" class="login-card">
+      <div class="login-logo"><span class="login-mark">K</span></div>
+      <h1>管理后台</h1>
+      <p class="login-sub">Kindle Trader AI · Admin</p>
+      <input id="loginPwd" type="password" placeholder="管理员密码" autocomplete="current-password" />
+      <button type="submit">登 录</button>
+      <p id="loginErr" class="login-err"></p>
+      <p class="login-hint">默认密码 <code>admin123</code>（可用环境变量 <code>ADMIN_PASSWORD</code> 修改）</p>
+    </form>
+  </div>
+
+  <!-- 主应用视图 -->
+  <div id="appView" class="app-view" style="display:none">
+    <header class="topnav">
+      <div class="nav-inner">
+        <div class="brand"><span class="brand-mark">K</span> Kindle Trader AI</div>
+        <nav id="nav">
+          <button class="nav-item active" data-sec="dashboard">仪表盘</button>
+          <button class="nav-item" data-sec="models">型号管理</button>
+          <button class="nav-item" data-sec="users">用户管理</button>
+          <button class="nav-item" data-sec="pricing">定价规则</button>
+          <button class="nav-item" data-sec="copywriting">文案模板</button>
+          <button class="nav-item" data-sec="usage">用量统计</button>
+          <button class="nav-item" data-sec="ai">AI 配置</button>
+          <button class="nav-item" data-sec="router">模型调度中心</button>
+        </nav>
+        <button id="logoutBtn" class="logout-btn">退出</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- 仪表盘 -->
+      <section id="sec-dashboard" class="section active">
+        <h2>仪表盘</h2>
+        <p class="hint">平台整体运营概览，数据实时刷新。</p>
+        <div id="dashCards" class="cards"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <h3>库存概览</h3>
+            <div id="dashInv"></div>
+          </div>
+          <div class="panel">
+            <h3>今日调用</h3>
+            <div id="dashUsage"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>用户概览</h3>
+          <div id="dashUsers"></div>
+        </div>
+      </section>
+
+      <!-- 型号管理 -->
+      <section id="sec-models" class="section">
+        <h2>型号行情库</h2>
+        <p class="hint">维护二手 Kindle 型号、参考报价区间与样本量，供用户端行情与定价调用。</p>
+        <div class="panel">
+          <h3 id="modelFormTitle">新增型号</h3>
+          <form id="modelForm" class="model-form">
+            <input type="hidden" id="m_id" />
+            <div class="form-row">
+              <label>名称*<input id="m_name" required placeholder="如 Kindle Paperwhite 11代" /></label>
+              <label>系列<input id="m_family" placeholder="Paperwhite" /></label>
+            </div>
+            <div class="form-row">
+              <label>代数<input id="m_generation" placeholder="11代" /></label>
+              <label>屏幕(寸)<input id="m_screen" type="number" step="0.1" placeholder="6.8" /></label>
+            </div>
+            <div class="form-row">
+              <label>年份<input id="m_year" type="number" placeholder="2021" /></label>
+              <label>样本量<input id="m_sample" type="number" placeholder="120" /></label>
+            </div>
+            <div class="form-row">
+              <label>参考价下限*<input id="m_low" type="number" required placeholder="350" /></label>
+              <label>参考价上限*<input id="m_high" type="number" required placeholder="420" /></label>
+            </div>
+            <div class="form-actions">
+              <button type="submit">保存</button>
+              <button type="button" id="modelCancel" class="ghost" style="display:none">取消编辑</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel">
+          <h3>型号列表（<span id="modelCount">0</span>）</h3>
+          <div class="table-wrap">
+            <table id="modelTable" class="data-table">
+              <thead><tr><th>ID</th><th>名称</th><th>系列</th><th>寸</th><th>年</th><th>参考区间</th><th>样本</th><th>更新</th><th>操作</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 用户管理 -->
+      <section id="sec-users" class="section">
+        <h2>用户管理</h2>
+        <p class="hint">查看注册用户、会员状态与账户余额，支持调账、授予 / 撤销 Pro 会员与删除。</p>
+        <div id="userCards" class="cards"></div>
+        <div class="panel">
+          <div class="toolbar">
+            <input id="userSearch" type="search" placeholder="搜索邮箱 / 昵称 / 微信 OpenID" />
+            <select id="userFilter">
+              <option value="all">全部会员</option>
+              <option value="pro">Pro 会员</option>
+              <option value="free">普通用户</option>
+            </select>
+            <button id="userRefresh" class="mini">刷新</button>
+          </div>
+          <div class="table-wrap">
+            <table id="userTable" class="data-table">
+              <thead><tr><th>ID</th><th>昵称</th><th>登录方式</th><th>账号</th><th>余额</th><th>会员</th><th>注册时间</th><th>操作</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pager" id="userPager"></div>
+        </div>
+      </section>
+
+      <!-- 定价规则 -->
+      <section id="sec-pricing" class="section">
+        <h2>定价规则</h2>
+        <p class="hint">修改后用户端定价立即按新规则计算。JSON 格式，可调整成色系数、配件加价、屏幕扣减、电池系数与建议区间浮动。</p>
+        <div class="panel">
+          <div class="form-actions">
+            <button id="pricingSave">保存定价规则</button>
+            <button id="pricingReset" class="ghost">恢复默认</button>
+            <span id="pricingMsg" class="msg"></span>
+          </div>
+          <textarea id="pricingJson" class="json-editor" spellcheck="false"></textarea>
+        </div>
+      </section>
+
+      <!-- 文案模板 -->
+      <section id="sec-copywriting" class="section">
+        <h2>文案模板</h2>
+        <p class="hint">占位符：<code>{model}</code> <code>{condition}</code> <code>{points}</code> <code>{price}</code>。修改后用户端文案立即更新。</p>
+        <div class="panel">
+          <div class="form-actions">
+            <button id="copySave">保存文案模板</button>
+            <button id="copyReset" class="ghost">恢复默认</button>
+            <span id="copyMsg" class="msg"></span>
+          </div>
+          <textarea id="copyJson" class="json-editor" spellcheck="false"></textarea>
+        </div>
+      </section>
+
+      <!-- 用量统计 -->
+      <section id="sec-usage" class="section">
+        <h2>AI 调用用量</h2>
+        <p class="hint">按日统计定价与文案接口的调用量，识别高频用户。</p>
+        <div id="usageCards" class="cards"></div>
+        <div class="panel">
+          <h3>近期按日统计</h3>
+          <div class="table-wrap">
+            <table id="usageTable" class="data-table">
+              <thead><tr><th>日期</th><th>动作</th><th>次数</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>高频用户 Top</h3>
+          <div class="table-wrap">
+            <table id="usageUsers" class="data-table">
+              <thead><tr><th>匿名 ID</th><th>调用次数</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI 模型配置（框架式多 Key 列表） -->
+      <section id="sec-ai" class="section">
+        <h2>AI 模型配置</h2>
+        <p class="hint">在此添加多家大模型 Key（可混合智谱 / 阿里云 / Claude / OpenAI），保存后立即生效、无需重启。价格数字始终由真实行情计算，模型仅做口语化润色。<br>支持：多 Key 列表管理、设为当前、启用/停用、按已存凭据测试连通性、模型列表动态拉取。<br>若已通过环境变量（LLM_PROVIDER / 各厂商 KEY）配置，则环境变量优先。</p>
+
+        <div class="panel">
+          <div class="llm-list-head">
+            <h3 class="panel-title">已配置的模型 Key <span id="llmKeysCount" class="count-pill">0</span></h3>
+            <button id="llmAddBtn" class="btn-primary sm">+ 添加模型 Key</button>
+          </div>
+          <div id="llmKeysList" class="llm-keys"></div>
+          <p id="llmKeysEmpty" class="hint">尚未添加任何 Key。点「+ 添加模型 Key」开始配置。</p>
+        </div>
+
+        <!-- 添加 / 编辑 弹窗 -->
+        <div id="llmModal" class="modal-mask" style="display:none;">
+          <div class="modal-box">
+            <div class="modal-head">
+              <h3 id="llmModalTitle">添加模型 Key</h3>
+              <button class="modal-close" id="llmModalClose">×</button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="llmEditId">
+              <label class="ai-field">
+                <span>服务商</span>
+                <select id="llmProvider">
+                  <option value="zhipu">智谱 GLM</option>
+                  <option value="alibaba">阿里云百炼（通义千问）</option>
+                  <option value="anthropic">Anthropic Claude</option>
+                  <option value="openai">OpenAI</option>
+                </select>
+              </label>
+              <label class="ai-field">
+                <span>API Key</span>
+                <input id="llmKey" type="password" placeholder="粘贴对应厂商的 API Key" autocomplete="off">
+                <small id="llmKeyHint" class="field-hint"></small>
+              </label>
+              <label class="ai-field">
+                <span>Base URL（可选，留空用默认）</span>
+                <input id="llmBaseUrl" type="text" placeholder="如：https://dashscope.aliyuncs.com/compatible-mode/v1">
+              </label>
+              <label class="ai-field">
+                <span>模型</span>
+                <div class="model-row">
+                  <input id="llmModel" type="text" placeholder="留空用厂商默认">
+                  <button id="llmFetchModels" class="btn-ghost sm" type="button">📋 选择</button>
+                </div>
+                <div id="llmModelList" class="model-list"></div>
+              </label>
+              <label class="ai-field">
+                <span>备注（可选）</span>
+                <input id="llmKeyLabel" type="text" placeholder="如：主账号 / 备用 Key">
+              </label>
+              <label class="ai-check">
+                <input id="llmSetActive" type="checkbox"> <span>设为当前使用</span>
+              </label>
+              <div class="form-actions">
+                <button id="llmSave" class="btn-primary">保存</button>
+                <span id="llmMsg" class="msg"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI 模型调度中心（Model Router） -->
+      <section id="sec-router" class="section">
+        <h2>AI 模型调度中心</h2>
+        <p class="hint">Model Router 统一管理所有大模型 API：按任务类型自动路由到最合适的模型，支持自动降级（Failover）保障服务不中断，并统计 Token 与成本。<br>模型 Key 仍由「AI 配置」管理；此处只负责路由策略、模型参数与成本看板。</p>
+
+        <!-- 任务路由策略 -->
+        <div class="panel">
+          <h3>任务路由策略</h3>
+          <p class="hint">为每种任务指定默认调用的模型；运行时按此路由，失败自动降级到下一个可用 Key。</p>
+          <div id="routerTaskTable" class="router-tasks"></div>
+          <div class="form-actions">
+            <button id="routerSaveTasks" class="btn-primary">保存路由策略</button>
+            <span id="routerTasksMsg" class="msg"></span>
+          </div>
+        </div>
+
+        <!-- 模型配置中心 -->
+        <div class="panel">
+          <h3>模型配置中心</h3>
+          <p class="hint">全局调用参数与开关（参考 V2.0 第 4.8 节）。</p>
+          <div class="form-row">
+            <label class="switch-line"><input type="checkbox" id="routerAutoDegrade" /> 开启自动降级（Failover）</label>
+            <label class="switch-line"><input type="checkbox" id="routerMultiModel" /> 允许多模型协同</label>
+          </div>
+          <div class="form-row">
+            <label>最大 Token 数<input type="number" id="routerMaxTokens" min="1" max="8000" /></label>
+            <label>API 超时(ms)<input type="number" id="routerTimeout" min="500" step="500" /></label>
+          </div>
+          <div class="form-row">
+            <label>Temperature<input type="number" step="0.1" id="routerTemp" min="0" max="2" /></label>
+            <label>Top P<input type="number" step="0.05" id="routerTopP" min="0" max="1" /></label>
+          </div>
+          <div class="form-row">
+            <label>最大并发<input type="number" id="routerConcurrency" min="1" max="50" /></label>
+          </div>
+          <div class="form-actions">
+            <button id="routerSaveCfg" class="btn-primary">保存模型配置</button>
+            <span id="routerCfgMsg" class="msg"></span>
+          </div>
+        </div>
+
+        <!-- 成本与用量看板 -->
+        <div class="panel">
+          <h3>成本与用量看板</h3>
+          <p class="hint">统计各模型 Token 消耗与估算成本（参考 V2.0 第 4.6 节）。</p>
+          <div id="routerCostCards" class="cards"></div>
+          <h4>各模型成本占比</h4>
+          <div class="table-wrap">
+            <table class="data-table" id="routerModelTable">
+              <thead><tr><th>模型</th><th>厂商</th><th>Token(in/out)</th><th>调用</th><th>成本</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <h4>各任务调用</h4>
+          <div class="table-wrap">
+            <table class="data-table" id="routerTaskCostTable">
+              <thead><tr><th>任务</th><th>调用</th><th>成本</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 用户详情弹窗 -->
+  <div id="userModal" class="modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="umTitle">用户详情</h3>
+        <button class="modal-x" id="umClose">✕</button>
+      </div>
+      <div id="umBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 调账弹窗 -->
+  <div id="balModal" class="modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>调整余额</h3>
+        <button class="modal-x" id="balClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="balUser" class="hint"></p>
+        <div class="form-row">
+          <label>金额（元，正为充值 / 负为扣减）<input id="balAmount" type="number" step="1" placeholder="如 50 或 -20" /></label>
+        </div>
+        <label>备注<input id="balNote" placeholder="管理员调账" /></label>
+        <div class="form-actions">
+          <button id="balSubmit">确认调整</button>
+        </div>
+        <div id="balMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/admin.js"></script>
+</body>
+</html>

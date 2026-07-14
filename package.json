@@ -1,0 +1,15 @@
+{
+  "name": "kindle-trader-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "二手 Kindle 行情分析 + AI 定价 + AI 文案 + 简易库存 MVP（零依赖，原生 Node + SQLite）",
+  "type": "commonjs",
+  "scripts": {
+    "start": "PORT=3200 node --experimental-sqlite src/server.js",
+    "dev": "PORT=3200 node --experimental-sqlite --watch src/server.js",
+    "seed": "node --experimental-sqlite src/db.js --reseed"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

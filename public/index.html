@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#fff3e9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E" />
+  <title>Kindle Trader AI · 二手行情/定价/文案</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    (function(){try{var t=localStorage.getItem('kta_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.dataset.theme='dark';}catch(e){}})();
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
+      <div>
+        <div class="title">Kindle Trader AI</div>
+        <div class="subtitle">二手行情 · AI定价 · AI文案 · 库存</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="usage" id="usagePill" title="免费版每日额度">
+        <span id="usagePricing">定价 ·</span>
+        <span class="sep">·</span>
+        <span id="usageCopy">文案 ·</span>
+      </div>
+      <a class="login-entry" id="loginEntry" href="/login.html">登录</a>
+    </div>
+  </header>
+
+  <main id="view">
+    <!-- 行情 -->
+    <section class="tab-panel" data-tab="market">
+      <div class="section-title">Kindle 行情参考</div>
+      <p class="hint">数据采集自人工采样维护的参考库（非实时爬虫）。样本量与更新时间均如实标注。</p>
+      <div class="market-tools">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" id="marketSearch" placeholder="搜索型号，如 Paperwhite" autocomplete="off" />
+        </div>
+        <select id="marketSort" aria-label="排序">
+          <option value="default">综合</option>
+          <option value="price_asc">价格 ↑</option>
+          <option value="price_desc">价格 ↓</option>
+        </select>
+      </div>
+      <div id="modelList" class="card-list"></div>
+    </section>
+
+    <!-- 定价 -->
+    <section class="tab-panel hidden" data-tab="price">
+      <div class="section-title">AI 智能定价</div>
+      <div class="router-spotlight" id="routerSpotlight">
+        <div class="rs-badge">AI 模型调度中心</div>
+        <h3>定价，由 Model Router 智能调度</h3>
+        <p class="rs-desc">系统不再绑定单一模型：Router 按「AI 定价」任务自动选择最合适的大模型，并在某模型不可用时<strong>自动降级</strong>到下一个可用 Key，保障服务不中断。价格数字始终由真实行情计算，模型仅做口语化润色。</p>
+        <div class="rs-status" id="routerSpotStatus">调度状态加载中…</div>
+      </div>
+      <div class="card">
+        <label class="field">
+          <span>型号</span>
+          <select id="priceModel"></select>
+        </label>
+        <label class="field">
+          <span>成色</span>
+          <div class="seg" id="priceCondition">
+            <button data-v="全新" class="active">全新</button>
+            <button data-v="9成新">9成新</button>
+            <button data-v="8成新">8成新</button>
+            <button data-v="5成新及以下">5成新及以下</button>
+          </div>
+        </label>
+        <label class="field">
+          <span>配件</span>
+          <div class="checks" id="priceAccessories">
+            <label><input type="checkbox" value="原装充电器" /> 原装充电器</label>
+            <label><input type="checkbox" value="原装包装盒" /> 原装包装盒</label>
+            <label><input type="checkbox" value="无配件" /> 无配件</label>
+          </div>
+        </label>
+        <label class="field">
+          <span>屏幕</span>
+          <label class="switch-line"><input type="checkbox" id="priceScreen" /> 有划痕/亮点（使用痕迹）</label>
+        </label>
+        <label class="field">
+          <span>电池健康度</span>
+          <select id="priceBattery">
+            <option value="优秀">优秀</option>
+            <option value="正常" selected>正常</option>
+            <option value="下降">下降</option>
+          </select>
+        </label>
+        <button class="btn primary" id="priceBtn">生成定价建议</button>
+      </div>
+      <div id="priceResult"></div>
+
+      <!-- 历史定价建议 -->
+      <div class="history-block" id="pricingHistoryBlock" hidden>
+        <div class="history-title"><span>📋 历史定价建议</span><button class="link-btn" id="pricingHistoryClear">清空</button></div>
+        <div id="pricingHistory" class="history-list"></div>
+      </div>
+
+      <!-- 采购决策（AI 辅助） -->
+      <div class="router-spotlight purchase-spot">
+        <div class="rs-badge">AI 采购决策 · Model Router</div>
+        <h3>该不该收？让 Qwen3-235B 帮你判断</h3>
+        <p class="rs-desc">输入你的收购价与预期售出价，系统读取真实行情、近 12 日走势与本店历史成交作为<strong>知识库</strong>，经 Model Router 调度到 Qwen3-235B 综合推理，输出是否值得收、目标价与风险点。未配置 AI 时自动回退本地规则。</p>
+      </div>
+      <div class="card">
+        <label class="field">
+          <span>型号</span>
+          <select id="purchaseModel"></select>
+        </label>
+        <label class="field">
+          <span>我的收购价 ¥</span>
+          <input type="number" id="purchasePrice" placeholder="如 320" />
+        </label>
+        <label class="field">
+          <span>预期售出价 ¥</span>
+          <input type="number" id="purchaseSell" placeholder="如 420" />
+        </label>
+        <label class="field">
+          <span>渠道</span>
+          <select id="purchaseChannel">
+            <option>闲鱼</option>
+            <option>转转</option>
+            <option>个人卖家</option>
+            <option>本地商家</option>
+            <option>其他</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>成色</span>
+          <select id="purchaseCondition">
+            <option>全新</option>
+            <option selected>9成新</option>
+            <option>8成新</option>
+            <option>5成新及以下</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>采购信息（文本）</span>
+          <textarea id="purchaseNote" rows="3" placeholder="补充附件、瑕疵、卖家描述等，信息越详细 AI 判断越准"></textarea>
+        </label>
+        <button class="btn primary" id="purchaseBtn">生成采购建议</button>
+      </div>
+      <div id="purchaseResult"></div>
+
+      <!-- 历史采购建议 -->
+      <div class="history-block" id="purchaseHistoryBlock" hidden>
+        <div class="history-title"><span>📋 历史采购建议</span><button class="link-btn" id="purchaseHistoryClear">清空</button></div>
+        <div id="purchaseHistory" class="history-list"></div>
+      </div>
+    </section>
+
+    <!-- 文案 -->
+    <section class="tab-panel hidden" data-tab="copy">
+      <div class="section-title">AI 文案生成</div>
+      <div class="card">
+        <label class="field">
+          <span>型号</span>
+          <select id="copyModel"></select>
+        </label>
+        <label class="field">
+          <span>成色</span>
+          <select id="copyCondition">
+            <option>全新</option><option selected>9成新</option><option>8成新</option><option>5成新及以下</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>售价（¥）</span>
+          <input type="number" id="copyPrice" placeholder="如 380" />
+        </label>
+        <label class="field">
+          <span>卖点（可多选）</span>
+          <div class="checks" id="copyPoints">
+            <label><input type="checkbox" value="电池健康" /> 电池健康</label>
+            <label><input type="checkbox" value="已贴膜" /> 已贴膜</label>
+            <label><input type="checkbox" value="无划痕" /> 无划痕</label>
+            <label><input type="checkbox" value="原装配件" /> 原装配件</label>
+            <label><input type="checkbox" value="可小刀" /> 可小刀</label>
+            <label><input type="checkbox" value="盒说全" /> 盒说全</label>
+          </div>
+        </label>
+        <button class="btn primary" id="copyBtn">生成文案</button>
+      </div>
+      <div id="copyResult"></div>
+
+      <!-- 历史文案 -->
+      <div class="history-block" id="copyHistoryBlock" hidden>
+        <div class="history-title"><span>📋 历史文案</span><button class="link-btn" id="copyHistoryClear">清空</button></div>
+        <div id="copyHistory" class="history-list"></div>
+      </div>
+    </section>
+
+    <!-- 库存 -->
+    <section class="tab-panel hidden" data-tab="stock">
+      <div class="section-title">库存与利润</div>
+      <div class="summary" id="stockSummary"></div>
+      <div class="card">
+        <div class="form-grid">
+          <label class="field"><span>型号</span><input id="invModel" placeholder="如 Kindle Paperwhite 11代" /></label>
+          <label class="field"><span>收购价 ¥</span><input type="number" id="invBuy" placeholder="200" /></label>
+          <label class="field"><span>收购日期</span><input type="date" id="invBuyDate" /></label>
+          <label class="field"><span>状态</span>
+            <select id="invStatus"><option value="在库">在库</option><option value="已售">已售</option></select>
+          </label>
+          <label class="field"><span>售出价 ¥</span><input type="number" id="invSell" placeholder="可选" /></label>
+          <label class="field"><span>售出日期</span><input type="date" id="invSellDate" /></label>
+          <label class="field"><span>平台</span>
+            <select id="invPlatform"><option>闲鱼</option><option>转转</option><option>其他</option></select>
+          </label>
+          <label class="field span2"><span>备注</span><input id="invNote" placeholder="可选" /></label>
+        </div>
+        <button class="btn primary" id="invAdd">添加记录</button>
+      </div>
+      <div id="invList" class="card-list"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-target="market"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span>行情</button>
+    <button class="tab" data-target="price"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/><path d="M9 12h.01M15 12h.01M9 16h6"/></svg></span>定价</button>
+    <button class="tab" data-target="copy"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>文案</button>
+    <button class="tab" data-target="stock"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>库存</button>
+  </nav>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- 文案编辑弹层 -->
+  <div class="modal-mask" id="copyEditMask" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <span>修改文案 · <b id="copyEditModel"></b></span>
+        <button class="icon-x" id="copyEditClose">×</button>
+      </div>
+      <div class="modal-body" id="copyEditBody"></div>
+      <div class="modal-foot">
+        <button class="btn sm ghost" id="copyEditCancel">取消</button>
+        <button class="btn sm primary" id="copyEditSave">保存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

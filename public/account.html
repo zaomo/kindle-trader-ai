@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#fff3e9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E" />
+  <title>我的 · Kindle Trader AI</title>
+  <link rel="stylesheet" href="/account.css" />
+  <script>
+    (function(){try{var t=localStorage.getItem('kta_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.dataset.theme='dark';}catch(e){}})();
+  </script>
+</head>
+<body>
+  <header class="acc-header">
+    <div class="brand">
+      <span class="logo">📚</span>
+      <div class="title">我的账户</div>
+    </div>
+    <button class="ghost-btn" id="logoutBtn">退出</button>
+  </header>
+
+  <main class="acc-main">
+    <!-- 用户信息 -->
+    <section class="card profile">
+      <div class="avatar" id="avatar">👤</div>
+      <div class="pinfo">
+        <div class="pname" id="pName">—</div>
+        <div class="pmeta" id="pMeta">—</div>
+      </div>
+      <span class="badge" id="mBadge">免费版</span>
+    </section>
+
+    <!-- 余额 -->
+    <section class="card balance-card">
+      <div class="blabel">账户余额</div>
+      <div class="bamount">¥<span id="balance">0.00</span></div>
+      <div class="brecharge">
+        <button class="chip-btn" data-amt="50">充 ¥50</button>
+        <button class="chip-btn" data-amt="100">充 ¥100</button>
+        <button class="chip-btn" data-amt="200">充 ¥200</button>
+      </div>
+    </section>
+
+    <!-- 会员 -->
+    <section class="card member-card" id="memberCard">
+      <div class="mrow">
+        <div>
+          <div class="mtitle">🚀 Pro 会员</div>
+          <div class="msub" id="mSub">解锁 AI 定价 / 文案 无限次</div>
+        </div>
+        <div class="mprice">¥19<small>/月</small></div>
+      </div>
+      <div class="mactions">
+        <button class="btn primary sm" id="buyMember">开通会员</button>
+        <button class="btn ghost sm" id="buyMemberBalance">用余额开通</button>
+      </div>
+      <div class="mexp" id="mExp" hidden></div>
+    </section>
+
+    <!-- 外观设置 -->
+    <section class="card">
+      <div class="section-title">外观</div>
+      <div class="block-title">主题</div>
+      <div class="theme-seg" id="themeSeg">
+        <button data-theme="system">跟随系统</button>
+        <button data-theme="light">浅色</button>
+        <button data-theme="dark">深色</button>
+      </div>
+    </section>
+
+    <!-- 充值记录 -->
+    <section class="card">
+      <div class="section-title">充值 / 消费记录</div>
+      <div id="rechargeList" class="recharge-list"><p class="hint">暂无记录</p></div>
+    </section>
+
+    <a class="back-link" href="/">← 返回应用首页</a>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="/account.js"></script>
+</body>
+</html>

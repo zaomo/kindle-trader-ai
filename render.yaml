@@ -1,0 +1,22 @@
+# Render 一键部署配置
+# 点击 README 中的 "Deploy to Render" 按钮即可使用本配置
+# 文档: https://render.com/docs/deploy-to-render-button
+services:
+  - type: web
+    name: kindle-trader-ai
+    runtime: node
+    plan: free
+    branch: main
+    # 零依赖，无需构建步骤
+    buildCommand: "echo 'kindle-trader-ai: zero-dependency, skipping build'"
+    # 关键：不能写成 PORT=3200，必须让云端注入的 $PORT 生效
+    startCommand: "node --experimental-sqlite src/server.js"
+    healthCheckPath: "/"
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: PORT
+        sync: false
+      # 公开 demo 下随机生成管理员密码，避免默认 admin123 被他人登录后台
+      - key: ADMIN_PASSWORD
+        generateValue: true
