@@ -6,10 +6,10 @@
 > 技术选型说明：需求文档建议 Next.js + Supabase。为在本机**零外部依赖、即开即用**地验证核心价值，
 > 本实现采用 Node 原生能力（`node:http` + 内置 `node:sqlite`）单仓一体，并把数据层与业务层解耦，
 > 后续可平滑迁移到 Next.js + Supabase（见文末「生产化迁移」）。
-
+ß
 > 🚀 **在线 Demo（一键部署）**：点击下方按钮即可把本项目部署到免费的 Render 云，获得一个可公开访问的 demo 链接，无需配置环境。
 >
-> [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/YOUR_USERNAME/kindle-trader-ai)
+> [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zaomo/kindle-trader-ai)
 >
 > 也支持 **Railway / Koyeb / Docker**（见仓库内 `render.yaml` / `railway.json` / `Dockerfile`）。本地运行只需一条命令：`npm start`（需 Node ≥ 22.5，零依赖）。
 
