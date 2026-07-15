@@ -10,7 +10,7 @@
 > 🚀 **在线 Demo（一键部署）**：点击下方按钮即可把本项目部署到免费的 Render 云，获得一个可公开访问的 demo 链接，无需配置环境。
 >
 > [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zaomo/kindle-trader-ai)
->
+> Demo网址（https://kindle-trader-ai.onrender.com/）
 > 也支持 **Railway / Koyeb / Docker**（见仓库内 `render.yaml` / `railway.json` / `Dockerfile`）。本地运行只需一条命令：`npm start`（需 Node ≥ 22.5，零依赖）。
 
 ## 运行
